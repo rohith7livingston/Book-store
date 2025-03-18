@@ -34,45 +34,31 @@ const AddBook = async (req, res) => {
     }
 };
 
-
-const RemoveBook = async (req, res) => {
+const handleRemoveBook = async () => {
+    if (!bookTitle) {
+      setResponseMessage('Book title is required to delete.');
+      return;
+    }
+  
     try {
-        const { Name } = req.body;
-
-        if (!Name) {
-            return res.status(400).json({
-                message: "Book Name is required",
-                status: "Failed"
-            });
-        }
-
-        const deletedBook = await BookModel.findOneAndDelete({ Name });
-
-        if (!deletedBook) {
-            return res.status(404).json({
-                message: "Book not found",
-                status: "Failed"
-            });
-        }
-
-        res.status(200).json({
-            message: "Book removed successfully",
-            status: "Success",
-            data: deletedBook
-        });
-
-    } catch (err) {
-        res.status(500).json({
-            message: err.message,
-            status: "Failed"
-        });
+      const response = await fetch('http://localhost:8000/api/book/RemoveBook', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ Name: bookTitle }),
+      });
+  
+      const data = await response.json();
+      setResponseMessage(data.message);
+    } catch (error) {
+      setResponseMessage('Error deleting the book.');
     }
 };
 
-
 const GetBook = async (req, res) => {
     try {
-        const { Name } = req.params; // Get Name from request parameters
+        const { Name } = req.params;
 
         if (!Name) {
             return res.status(400).json({
@@ -81,7 +67,6 @@ const GetBook = async (req, res) => {
             });
         }
 
-        // Search for the book
         const book = await BookModel.findOne({ Name });
 
         if (!book) {
@@ -105,5 +90,4 @@ const GetBook = async (req, res) => {
     }
 };
 
-
-module.exports = { AddBook , RemoveBook ,GetBook};
+module.exports = { AddBook, handleRemoveBook, GetBook };
